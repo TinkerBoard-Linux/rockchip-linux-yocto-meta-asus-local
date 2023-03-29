@@ -1,0 +1,17 @@
+## System Test Tool SOP##
+
+Start test
+1. Launch terminal
+2. Execute the following commands
+   $ cd /home/root/Test_tool/System_test
+   $ bash System_test.sh
+3. Enter test case number, and start test
+
+Stop test - shutdown & reboot
+1. Execute this command
+   $ bash System_test.sh
+2. Enter "4" to stop test
+
+Stop test - suspend
+1. Press Ctrl + C to stop suspend test
+
