@@ -1,0 +1,416 @@
+#!/bin/bash
+
+INTERACTIVE=True
+ASK_TO_REBOOT=0
+
+TOOL_VERSION="1.0.0"
+TOOL_NAME="Asus Tinker Board 2 (Yocto) Software Configuration Tool (tinker-config)"
+HWCONFIG=/boot/config.txt
+CMDLINE=/boot/cmdline.txt
+
+get_hostname() {
+    cat /etc/hostname | tr -d " \t\n\r"
+}
+
+do_change_hostname() {
+  if [ "$INTERACTIVE" = True ]; then
+  whiptail --msgbox "\
+Please note: RFCs mandate that a hostname's labels \
+may contain only the ASCII letters 'a' through 'z' (case-insensitive),
+the digits '0' through '9', and the hyphen.
+Hostname labels cannot begin or end with a hyphen.
+No other symbols, punctuation characters, or blank spaces are permitted.\
+" 20 70 1
+  fi
+  CURRENT_HOSTNAME=`cat /etc/hostname | tr -d " \t\n\r"`
+  if [ "$INTERACTIVE" = True ]; then
+    NEW_HOSTNAME=$(whiptail --inputbox "Please enter a hostname" 20 60 "$CURRENT_HOSTNAME" 3>&1 1>&2 2>&3)
+  else
+    NEW_HOSTNAME=$1
+    true
+  fi
+  if [ $? -eq 0 ]; then
+    echo $NEW_HOSTNAME > /etc/hostname
+    sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\t$NEW_HOSTNAME/g" /etc/hosts
+    ASK_TO_REBOOT=1
+  fi
+}
+
+#
+# Other functions
+#
+
+calc_wt_size() {
+  # NOTE: it's tempting to redirect stderr to /dev/null, so supress error
+  # output from tput. However in this case, tput detects neither stdout or
+  # stderr is a tty and so only gives default 80, 24 values
+  WT_HEIGHT=20
+  WT_WIDTH=$(tput cols)
+
+  if [ -z "$WT_WIDTH" ] || [ "$WT_WIDTH" -lt 60 ]; then
+    WT_WIDTH=80
+  fi
+  if [ "$WT_WIDTH" -gt 178 ]; then
+    WT_WIDTH=120
+  fi
+  WT_MENU_HEIGHT=$(($WT_HEIGHT-10))
+}
+
+do_finish() {
+  if [ $ASK_TO_REBOOT -eq 1 ]; then
+    whiptail --yesno "Would you like to reboot now?" 20 60 2
+    if [ $? -eq 0 ]; then # yes
+      sync
+      reboot
+    fi
+  fi
+  exit 0
+}
+
+get_camera() {
+  if grep -q -E "camera-ov5647-overlay" $HWCONFIG; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+do_camera() {
+  if [ "$INTERACTIVE" = True ]; then
+    CAMERA_OUT=$(whiptail --menu "Choose a camera setting (Need Reboot)" 20 60 10 --default-item $(get_camera)\
+    "0" "IMX219 (Raspiberry Camera V2, 8MP)" \
+    "1" "OV5647 (Raspiberry Camera V1, 5MP)" \
+    3>&1 1>&2 2>&3)
+  else
+    CAMERA_OUT=$1
+  fi
+  if [ $? -eq 0 ]; then
+    case "$CAMERA_OUT" in
+      0)
+        if grep -q "camera-ov5647-overlay" $HWCONFIG ; then
+          sed -i $HWCONFIG -e "s/ camera-ov5647-overlay //"
+          sed -i $HWCONFIG -e "s/ camera-ov5647-overlay//"
+          sed -i $HWCONFIG -e "s/camera-ov5647-overlay //"
+          sed -i $HWCONFIG -e "s/camera-ov5647-overlay//"
+        fi
+        ;;
+      1)
+        if ! grep -q "camera-ov5647-overlay" $HWCONFIG ; then
+          OUTPUT=$(tail -n1 $HWCONFIG)
+          if [ "$OUTPUT" = "overlay=" ]; then
+            sed -i $HWCONFIG -e "\$s/\$/camera-ov5647-overlay/"
+          else
+            sed -i $HWCONFIG -e "\$s/\$/ camera-ov5647-overlay/"
+          fi
+        fi
+        ;;
+      *)
+        whiptail --msgbox "Programmer error: unrecognized option" 20 60 1
+        ;;
+    esac
+    ASK_TO_REBOOT=1
+  fi
+}
+
+get_ssh() {
+  if systemctl status ssh.socket | grep -q "inactive"; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+get_serial() {
+  if grep -q -E "console-uart0-overlay" $HWCONFIG; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+do_serial() {
+  if [ "$INTERACTIVE" = True ]; then
+    CAMERA_OUT=$(whiptail --menu "Choose a console setting (Need Reboot)" 20 60 10 --default-item $(get_serial)\
+    "0" "UART2c (J6 jumper)" \
+    "1" "UART0  (40pin)" \
+    3>&1 1>&2 2>&3)
+  else
+    CAMERA_OUT=$1
+  fi
+  if [ $? -eq 0 ]; then
+    case "$CAMERA_OUT" in
+      0)
+        if grep -q "console-uart0-overlay" $HWCONFIG ; then
+          sed -i $HWCONFIG -e "s/ console-uart0-overlay //"
+          sed -i $HWCONFIG -e "s/ console-uart0-overlay//"
+          sed -i $HWCONFIG -e "s/console-uart0-overlay //"
+          sed -i $HWCONFIG -e "s/console-uart0-overlay//"
+        fi
+        ;;
+      1)
+        if ! grep -q "console-uart0-overlay" $HWCONFIG ; then
+          OUTPUT=$(tail -n1 $HWCONFIG)
+          if [ "$OUTPUT" = "overlay=" ]; then
+            sed -i $HWCONFIG -e "\$s/\$/console-uart0-overlay/"
+          else
+            sed -i $HWCONFIG -e "\$s/\$/ console-uart0-overlay/"
+          fi
+        fi
+        ;;
+      *)
+        whiptail --msgbox "Programmer error: unrecognized option" 20 60 1
+        ;;
+    esac
+    ASK_TO_REBOOT=1
+  fi
+}
+
+do_spi() {
+  if [ "$INTERACTIVE" = True ]; then
+    INTF=spi
+    oIFS="$IFS"
+    IFS="#"
+    if grep -q "#intf:$INTF" $HWCONFIG ; then
+      sed $HWCONFIG -i -e "s/#intf:$INTF/intf:$INTF/g"
+    fi
+    if grep -q "#intf:uart4" $HWCONFIG ; then
+      sed $HWCONFIG -i -e "s/#intf:uart4/intf:uart4/g"
+    fi
+    value=$(cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=\(\(on\|off\)\)/\1#Enable\/Disable \1 #\2/g" | tr '\n' '#')
+    ENABLE=$(whiptail --separate-output \
+--checklist "You can select and deselect items using the SPACE key.\n\
+Switch between <Ok> and <Cancel> by pressing the TAB key.\nLegend: [*] Enable  [ ] Disable" 20 60 10 \
+                  $value  3>&1 1>&2 2>&3)
+    exitstatus=$?
+    IFS=$oIFS
+
+    ALLOPT=$( cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=.*/\1 /g" )
+    DISABLE=$( echo  $ENABLE $ALLOPT | tr ' ' '\n' | sort | uniq -u )
+
+    if [ $exitstatus = 0 ]; then
+        for ch in $ENABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=on/g"
+            if [ $ch = "spi0" ]; then
+              sed -i $HWCONFIG -e "s/^intf:uart4=.*$/intf:uart4=off/g"
+            fi
+        done
+        for ch in $DISABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=off/g"
+        done
+        whiptail --msgbox "These changes will take effect on the next reboot" 20 60 1
+        ASK_TO_REBOOT=1
+    else
+        return 0
+    fi
+  fi
+}
+
+do_i2c() {
+  if [ "$INTERACTIVE" = True ]; then
+    INTF=i2c
+    oIFS="$IFS"
+    IFS="#"
+    if grep -q "#intf:$INTF" $HWCONFIG ; then
+      sed $HWCONFIG -i -e "s/#intf:$INTF/intf:$INTF/g"
+    fi
+    value=$(cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=\(\(on\|off\)\)/\1#Enable\/Disable \1 #\2/g" | tr '\n' '#')
+    ENABLE=$(whiptail --separate-output \
+--checklist "You can select and deselect items using the SPACE key.\n\
+Switch between <Ok> and <Cancel> by pressing the TAB key.\nLegend: [*] Enable  [ ] Disable" 20 60 10 \
+                  $value  3>&1 1>&2 2>&3)
+    exitstatus=$?
+    IFS=$oIFS
+
+    ALLOPT=$( cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=.*/\1 /g" )
+    DISABLE=$( echo  $ENABLE $ALLOPT | tr ' ' '\n' | sort | uniq -u )
+
+    if [ $exitstatus = 0 ]; then
+        for ch in $ENABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=on/g"
+        done
+        for ch in $DISABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=off/g"
+        done
+        whiptail --msgbox "These changes will take effect on the next reboot" 20 60 1
+        ASK_TO_REBOOT=1
+    else
+        return 0
+    fi
+  fi
+}
+
+do_uart(){
+  if [ "$INTERACTIVE" = True ]; then
+    INTF=uart
+    oIFS="$IFS"
+    IFS="#"
+    if grep -q "#intf:$INTF" $HWCONFIG ; then
+      sed $HWCONFIG -i -e "s/#intf:$INTF/intf:$INTF/g"
+    fi
+    if grep -q "#intf:spi1" $HWCONFIG ; then
+      sed $HWCONFIG -i -e "s/#intf:spi1/intf:spi1/g"
+    fi
+    value=$(cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=\(\(on\|off\)\)/\1#Enable\/Disable \1 #\2/g" | tr '\n' '#')
+    ENABLE=$(whiptail --separate-output \
+--checklist "You can select and deselect items using the SPACE key.\n\
+Switch between <Ok> and <Cancel> by pressing the TAB key.\nLegend: [*] Enable  [ ] Disable" 20 60 10 \
+                  $value  3>&1 1>&2 2>&3)
+    exitstatus=$?
+    IFS=$oIFS
+
+    ALLOPT=$( cat $HWCONFIG | grep ^intf:$INTF | sed "s/^intf:\($INTF[0-9]\)=.*/\1 /g" )
+    DISABLE=$( echo  $ENABLE $ALLOPT | tr ' ' '\n' | sort | uniq -u )
+
+    if [ $exitstatus = 0 ]; then
+        for ch in $ENABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=on/g"
+            if [ $ch = "uart4" ]; then
+              sed -i $HWCONFIG -e "s/^intf:spi1=.*$/intf:spi1=off/g"
+            fi
+        done
+        for ch in $DISABLE; do
+            sed -i $HWCONFIG -e "s/^intf:${ch}=.*$/intf:${ch}=off/g"
+        done
+        whiptail --msgbox "These changes will take effect on the next reboot" 20 60 1
+        ASK_TO_REBOOT=1
+    else
+        return 0
+    fi
+  fi
+}
+
+get_audio() {
+  DEFAULT_SINK=$(sudo -u linaro PULSE_RUNTIME_PATH=/run/user/1000/pulse pacmd stat | grep "Default sink name:" | sed -n 's/^Default sink name: *//p')
+  case "$DEFAULT_SINK" in
+    alsa_output.platform-hdmi-sound.stereo-fallback)
+      echo 1
+      ;;
+    alsa_output.platform-spdif-sound.stereo-fallback)
+      echo 2
+      ;;
+    *)
+      /etc/pulse/movesinks.sh alsa_output.platform-hdmi-sound.stereo-fallback > /dev/null
+      echo 1
+      ;;
+  esac
+}
+
+do_audio() {
+  if [ "$INTERACTIVE" = True ]; then
+    AUDIO_OUT=$(whiptail --menu "Choose the audio output" 20 60 10 --default-item $(get_audio)\
+      "1" "Force HDMI" \
+      "2" "Force SPDIF" \
+      3>&1 1>&2 2>&3)
+  else
+    AUDIO_OUT=$1
+  fi
+  if [ $? -eq 0 ]; then
+    case "$AUDIO_OUT" in
+      1)
+        AUDIO_ARG="alsa_output.platform-hdmi-sound.stereo-fallback"
+        ;;
+      2)
+        AUDIO_ARG="alsa_output.platform-spdif-sound.stereo-fallback"
+        ;;
+      *)
+        whiptail --msgbox "Programmer error: unrecognized option" 20 60 1
+        ;;
+    esac
+    if ! [ "$AUDIO_ARG" = "" ]; then
+      /etc/pulse/movesinks.sh $AUDIO_ARG
+    fi
+  fi
+}
+
+is_installed() {
+    if [ "$(dpkg -l "$1" 2> /dev/null | tail -n 1 | cut -d ' ' -f 1)" != "ii" ]; then
+      return 1
+    else
+      return 0
+    fi
+}
+
+get_vnc() {
+  if systemctl status vncserver.service  | grep -q -w active; then
+    echo 0
+  else
+    echo 1
+  fi
+}
+
+do_about() {
+  whiptail --msgbox "\
+Asus Tinker Board Software Configuration Tool v$TOOL_VERSION \n\nThis tool provides a straight-forward way of doing initial configuration of the Asus Tinker Board. Although it can be run at any time, some of the options may have difficulties if you have heavily customised your installation.\
+  " 20 70 1
+}
+
+do_interface_menu() {
+  FUN=$(whiptail --title "Asus Tinkerboard Software Configuration Tool (tinker-config)" --menu "Interface Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Back --ok-button Select \
+    "F1  Camera" "Camera setting" \
+    "F2  Serial Shell" "Serial connection setting" \
+    "F3  SPI" "Enable/Disable automatic loading of SPI kernel module" \
+    "F4  I2C" "Enable/Disable automatic loading of I2C kernel module" \
+    "F5  UART" "Enable/Disable automatic loading of UART kernel module" \
+    "F6  Audio" "Audio device setting" \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then
+    return 0
+  elif [ $RET -eq 0 ]; then
+    case "$FUN" in
+      F1\ *) do_camera ;;
+      F2\ *) do_serial ;;
+      F3\ *) do_spi ;;
+      F4\ *) do_i2c ;;
+      F5\ *) do_uart ;;
+      F6\ *) do_audio ;;
+      *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+    esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+  fi
+}
+
+#
+# Main function
+#
+
+# Everything else needs to be run as root
+if [ $(id -u) -ne 0 ]; then
+  printf "Script must be run as root. Try 'sudo tinker-config'\n"
+  exit 1
+fi
+
+#
+# Interactive use loop
+#
+if [ "$INTERACTIVE" = True ]; then
+  calc_wt_size
+
+  whiptail --msgbox "Welcome to Asus Tinker Board Software Configuration Tool (Experimental).
+
+This version is based off the popular version from the SBC (single board computer) community and is still in its development stage.
+
+Currently some features may not be available as they were not originally designed for this board or are still under development. Please understand that you may encounter situations where some features cannot be used.
+
+" $WT_HEIGHT $WT_WIDTH 1
+
+  while true; do
+    FUN=$(whiptail --title "$TOOL_NAME" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
+      "1 Hostname" "Set the visible name for this Tinker Board on a network" \
+      "2 Interfacing Options" "Configure connections to peripherals" \
+      "3 About tinker-config" "Information about this configuration tool" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      do_finish
+    elif [ $RET -eq 0 ]; then
+      case "$FUN" in
+        1\ *) do_change_hostname ;;
+        2\ *) do_interface_menu ;;
+        3\ *) do_about ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    else
+      exit 1
+    fi
+  done
+fi
