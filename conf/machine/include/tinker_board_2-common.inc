@@ -14,6 +14,8 @@ do_asus_post_rootfs() {
 
 	chown -R root:root ${IMAGE_ROOTFS}/etc/sudoers
 	chmod -R 440 ${IMAGE_ROOTFS}/etc/sudoers
+	chown -R root:root ${IMAGE_ROOTFS}/etc/init.d/triggerhappy
+	chmod -R 755 ${IMAGE_ROOTFS}/etc/init.d/triggerhappy
 }
 
 ASUS_OVERLAY_DEBUG_DIRS:append = " \
