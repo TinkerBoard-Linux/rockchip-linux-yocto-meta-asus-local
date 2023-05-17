@@ -20,6 +20,8 @@ case "$1" in
 	start)
 		echo -n "Starting ASUS init"
 		do_set_led_trigger
+		# set DNS server
+		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		echo "."
 		;;
 	stop)
