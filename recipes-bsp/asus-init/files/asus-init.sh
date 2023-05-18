@@ -16,9 +16,16 @@ do_set_led_trigger()
 	fi
 }
 
+do_mount_boot()
+{
+	MMC=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F 'p8' '{print $1}' | awk -F 'mmc' '{print $2}')
+	mount "/dev/mmc${MMC}p7" /boot/
+}
+
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
+		do_mount_boot
 		do_set_led_trigger
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
