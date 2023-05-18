@@ -22,6 +22,14 @@ do_mount_boot()
 	mount "/dev/mmc${MMC}p7" /boot/
 }
 
+do_create_xrandr()
+{
+	mkdir -p /boot/display/hdmi
+	mkdir /boot/display/dp
+	echo temp > /boot/display/hdmi/xrandr.cfg
+	echo temp > /boot/display/dp/xrandr.cfg
+}
+
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
@@ -29,6 +37,7 @@ case "$1" in
 		do_set_led_trigger
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
+		do_create_xrandr
 		echo "."
 		;;
 	stop)
