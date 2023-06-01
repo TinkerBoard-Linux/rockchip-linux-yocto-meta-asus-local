@@ -138,7 +138,7 @@ memtest()
 CPU="stressapptest"
 GPU="glmark2-es2-wayland"
 DDR="memtester"
-EMMC="emmc_stress_test.sh"
+EMMC="emmc_str"
 SD="sd_card"
 Network="network"
 

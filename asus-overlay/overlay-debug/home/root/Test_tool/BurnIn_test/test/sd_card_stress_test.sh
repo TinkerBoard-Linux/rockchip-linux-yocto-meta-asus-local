@@ -16,19 +16,21 @@ log()
 get_mount_point()
 {
 	ROOTFS_MMCBLK=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F '`-' '{print $2}' | awk -F 'p3' '{print $1}')
-	if [ $ROOTFS_MMCBLK == $mmcdev ];then
+	if [[ $ROOTFS_MMCBLK == $mmcdev ]];then
 		echo "$TAG boot up device"
 		tmpfile="/tmpfile"
 	else
-		#Check MMC device exist or not
+		umount /dev/mmcblk1p1 > /dev/null 2>&1
+		mount /dev/mmcblk1p1 /mnt/
 		mount_point=$(cat /proc/mounts | grep $mmcdev | awk '{print $2}')
 		mount_point=$(echo $mount_point | awk '{print $1}')
 
 		echo mount_point = $mount_point
 
-		if [ -z $mount_point ]; then
+		if [[ -z $mount_point ]]; then
 			mmc_blk=$(cat /proc/partitions | grep $mmcdev | awk '{print $4}')
-			if [ -z $mmc_blk ]; then
+			echo mmc_blk=$mmc_blk
+			if [[ -z $mmc_blk ]]; then
 				log "$TAG($mmcdev) not detect, exit test!!"
 				exit
 			else
