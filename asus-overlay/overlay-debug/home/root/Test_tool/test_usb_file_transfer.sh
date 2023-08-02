@@ -19,17 +19,20 @@ if [ -z "$usbdev" ];then
 	echo "No USB Storage found"
 	exit
 else
-	sudo mount /dev/sda1 /mnt/usb_storage
+	while [ 1 != 2 ]
+	do
+		sudo mount /dev/sda1 /mnt/usb_storage
 
-	echo "Start Write Test"
-	sync
-	echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null 2>&1
-	sudo dd if=/dev/zero of=/mnt/usb_storage/tmpfile bs=256M count=15 conv=fdatasync
+		echo "Start Write Test"
+		sync
+		echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null 2>&1
+		sudo dd if=/dev/zero of=/mnt/usb_storage/tmpfile bs=256M count=15 conv=fdatasync
 
-	echo "Start Read Test"
-	sync
-	echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null 2>&1
-	sudo dd if=/mnt/usb_storage/tmpfile of=/dev/null bs=256M count=15
-	sudo rm /mnt/usb_storage/tmpfile
-	sudo umount /dev/sda1
+		echo "Start Read Test"
+		sync
+		echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null 2>&1
+		sudo dd if=/mnt/usb_storage/tmpfile of=/dev/null bs=256M count=15
+		sudo rm /mnt/usb_storage/tmpfile
+		sudo umount /dev/sda1
+	done
 fi
