@@ -18,6 +18,8 @@ do_asus_post_rootfs() {
 	chmod -R 755 ${IMAGE_ROOTFS}/etc/init.d/triggerhappy
 	chown -R root:root ${IMAGE_ROOTFS}/etc/profile.d/ethernet_wol.sh
 	chmod -R 755 ${IMAGE_ROOTFS}/etc/profile.d/ethernet_wol.sh
+	chown -R root:root ${IMAGE_ROOTFS}/usr/lib/pm-utils/sleep.d/99ethernet_restart
+	chmod -R 755 ${IMAGE_ROOTFS}/usr/lib/pm-utils/sleep.d/99ethernet_restart
 }
 
 ASUS_OVERLAY_DEBUG_DIRS:append = " \
