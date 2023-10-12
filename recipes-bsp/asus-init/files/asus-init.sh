@@ -30,12 +30,6 @@ do_create_xrandr()
 	echo temp > /boot/display/dp/xrandr.cfg
 }
 
-do_start_pulseaudio()
-{
-	chown weston:weston -R /run/user/1000
-	pulseaudio --start
-}
-
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
@@ -44,7 +38,6 @@ case "$1" in
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		do_create_xrandr
-		do_start_pulseaudio
 		echo "."
 		;;
 	stop)
