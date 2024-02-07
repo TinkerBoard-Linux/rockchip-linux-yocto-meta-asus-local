@@ -1,13 +1,16 @@
 #!/bin/sh
 
-# Need kill/restart Pulseaudio when system resume from suspend.
+# Need suspend sink Pulseaudio when system resume and suspend.
 
 . "${PM_FUNCTIONS}"
 
 case $1 in
+	suspend)
+		sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink true
+		;;
 	thaw|resume)
-		kill -9 $(pidof pulseaudio)
-	;;
+		sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink false
+		;;
 	*) exit $NA
 		;;
 esac
