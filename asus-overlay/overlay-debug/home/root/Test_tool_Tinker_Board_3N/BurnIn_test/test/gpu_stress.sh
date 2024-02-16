@@ -2,7 +2,7 @@
 
 #export XDG_RUNTIME_DIR="/run/user/0"
 export DISPLAY=:0
-export XDG_RUNTIME_DIR="/run/user/1000"
+export XDG_RUNTIME_DIR="/run/user/0"
 #xhost local:$USER
 if [ $1 == "imx8" ]; then
 	gputool=glmark2-es2-wayland
