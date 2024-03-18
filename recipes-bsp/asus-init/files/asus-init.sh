@@ -33,6 +33,12 @@ do_resize()
 	/sbin/resize-data.sh
 }
 
+do_start_fotaclient()
+{
+	mkdir -p /data/fota
+	/sbin/start-fotaclient.sh
+}
+
 do_create_xrandr()
 {
 	mkdir -p /boot/display/hdmi
@@ -47,6 +53,7 @@ case "$1" in
 		#do_mount_boot
 		do_resize
 		do_set_led_trigger
+		do_start_fotaclient
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		do_create_xrandr
