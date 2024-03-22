@@ -36,6 +36,18 @@ do_resize()
 do_start_fotaclient()
 {
 	mkdir -p /data/fota
+	UPG_FILE_PATH="/data/fota/recovery/update_status.txt"
+	if [ -e $UPG_FILE_PATH ]; then
+		UPG_STATE=$(cat $UPG_FILE_PATH)
+		if [ "${UPG_STATE}" == "0" ]; then
+			echo "[FotaClient]: UPG_STATE = 200" > /dev/kmsg
+			echo "200" > /data/fota/upg_OTA_status
+		elif [ "${UPG_STATE}" == "1" ]; then
+			echo "[FotaClient]: UPG_STATE = 410" > /dev/kmsg
+			echo "410" > /data/fota/upg_OTA_status
+		fi
+		rm $UPG_FILE_PATH
+	fi
 	/sbin/start-fotaclient.sh
 }
 
