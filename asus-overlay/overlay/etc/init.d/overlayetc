@@ -2,13 +2,13 @@
 
 echo "overlayetc start $1 $2" > /dev/kmsg
 
-# mount userdata partition from /dev/mmcblk0p7 or /dev/mmcblk1p7
-if [ "$2" = /dev/mmcblk1p9 ];then
-    echo "overlayetc sd boot, mount /dev/mmcblk1p7 to /boot" > /dev/kmsg
-    mount -o ro "/dev/mmcblk1p7" /boot
+# mount userdata partition from /dev/mmcblk0p8 or /dev/mmcblk1p8
+if [ "$2" = /dev/mmcblk1p10 ];then
+    echo "overlayetc sd boot, mount /dev/mmcblk1p8 to /boot" > /dev/kmsg
+    mount -o ro "/dev/mmcblk1p8" /boot
 else
-    echo "overlayetc emmc boot, mount /dev/mmcblk0p7 to /boot" > /dev/kmsg
-    mount -o ro "/dev/mmcblk0p7" /boot
+    echo "overlayetc emmc boot, mount /dev/mmcblk0p8 to /boot" > /dev/kmsg
+    mount -o ro "/dev/mmcblk0p8" /boot
 fi
 
 # mount data partition

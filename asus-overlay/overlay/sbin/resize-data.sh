@@ -12,10 +12,10 @@ RESIZE2FS=$(which resize2fs) || { echo "E: You must have resize2fs" && exit 1; }
 echo "resize: start resize-date.sh" > /dev/kmsg
 
 # find data device
-MMC=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F 'p8' '{print $1}' | awk -F 'mmc' '{print $2}')
+MMC=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F 'p9' '{print $1}' | awk -F 'mmc' '{print $2}')
 PART_ENTRY_NUMBER=$(ls /sys/class/block/mmc${MMC} | grep -c mmc${MMC}p)
 
-if [ "$PART_ENTRY_NUMBER" -le "8" ]; then
+if [ "$PART_ENTRY_NUMBER" -le "9" ]; then
      echo "there is nPARTITION_SIZE=$o data partition" > /dev/kmsg
      exit 1
 fi
