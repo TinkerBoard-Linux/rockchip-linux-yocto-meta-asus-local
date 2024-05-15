@@ -22,6 +22,17 @@ do_mount_boot()
 	mount "/dev/mmc${MMC}p7" /boot/
 }
 
+do_resize()
+{
+	if [ ! -e /boot/.firstrun ]; then
+		/usr/bin/resize-helper
+		MMC=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F 'p8' '{print $1}' | awk -F 'mmc' '{print $2}')
+		/sbin/resize2fs /dev/mmc${MMC}p7
+		touch /boot/.firstrun
+	fi
+	/sbin/resize-data.sh
+}
+
 do_create_xrandr()
 {
 	mkdir -p /boot/display/hdmi
@@ -33,7 +44,8 @@ do_create_xrandr()
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
-		do_mount_boot
+		# do_mount_boot
+                do_resize
 		do_set_led_trigger
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
