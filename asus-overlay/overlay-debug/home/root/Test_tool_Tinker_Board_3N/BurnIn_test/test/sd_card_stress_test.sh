@@ -18,7 +18,7 @@ get_mount_point()
 	ROOTFS_MMCBLK=$(lsblk | grep "part /" | grep -v "/[a-z]" | awk -F ' ' '{print $1}' | awk -F 'p' '{print $1}' | awk -F 'mmcblk' '{new_var="mmcblk"$2;print new_var}')
 	if [ $ROOTFS_MMCBLK == $mmcdev ];then
 		echo "$TAG boot up device"
-		tmpfile="/tmpfile"
+		tmpfile="/data/tmpfile"
 	else
 		#Check MMC device exist or not
 		mount_point=$(cat /proc/mounts | grep $mmcdev | awk '{print $2}')
