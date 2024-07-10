@@ -2,7 +2,7 @@
 SOC_TYPE=$3
 logfile=$2
 if [ $SOC_TYPE == "rockchip" ]; then
-	wlan_interface=wlp1s0
+	wlan_interface=wlan0
 else
 	wlan_intreface=wlan0
 fi

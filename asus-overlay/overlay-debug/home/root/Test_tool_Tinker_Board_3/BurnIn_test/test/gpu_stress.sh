@@ -2,13 +2,14 @@
 
 #export XDG_RUNTIME_DIR="/run/user/0"
 export DISPLAY=:0
+export XDG_RUNTIME_DIR="/run/user/1000"
 #xhost local:$USER
 if [ $1 == "imx8" ]; then
 	gputool=glmark2-es2-wayland
 elif [ $1 == "tegra" ]; then
 	gputool=glmark2
 elif [ $1 == "rockchip" ]; then
-	gputool=glmark2-es2
+	gputool=glmark2-es2-wayland
 fi
 if [ ! -z "$2" ]; then
 	background_num=$2
@@ -17,7 +18,7 @@ else
 fi
 
 if [ $1 == "rockchip" ]; then
-	sudo su -c "$gputool --benchmark refract --run-forever > /dev/null &"
+	$gputool --benchmark refract --run-forever > /dev/null &
 else
 	su asus -c "/usr/bin/xterm -display :0 -e '$gputool --benchmark terrain --run-forever' > /dev/null &"
 fi
@@ -29,7 +30,7 @@ do
 #	$gputool --benchmark terrain --run-forever --off-screen > /dev/null &
 #        sudo /usr/bin/xterm -display :0.0 $gputool
 	if [ $1 == "rockchip" ]; then
-		sudo su -c "$gputool --benchmark refract --run-forever --off-screen > /dev/null &"
+		$gputool --benchmark refract --run-forever --off-screen > /dev/null &
 	else
 		su asus -c "/usr/bin/xterm -display :0 -e '$gputool --benchmark terrain --run-forever --off-screen' > /dev/null &"
 	fi

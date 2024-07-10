@@ -122,7 +122,7 @@ case "$1" in
 #		echo 1 | sudo tee /proc/sys/kernel/sysrq
 #		echo b | sudo tee /proc/sysrq-trigger
 		log "Call reboot"
-		systemctl reboot
+		sudo reboot
 		;;
 	stop)
 		echo "Stopping reboot_test"

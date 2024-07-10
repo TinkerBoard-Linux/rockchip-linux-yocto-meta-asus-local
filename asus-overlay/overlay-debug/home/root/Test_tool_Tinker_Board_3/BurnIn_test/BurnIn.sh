@@ -894,7 +894,7 @@ case $test_item in
 		;;
 	6)
 		info_view Extnal_Storage_RW
-		ext_storage_stress_test ui
+		ext_storage_stress_test bk
 		;;
 	7)
 		info_view Ethernet

@@ -84,7 +84,7 @@ case $test_item in
 		info_view Shutdown
 		sudo cp $SCRIPTPATH/shutdown_test.sh /etc/init.d/
 		sudo update-rc.d shutdown_test.sh defaults
-		#sudo update-rc.d shutdown_test.sh enable
+		sudo update-rc.d shutdown_test.sh enable
 		sudo bash -c "echo +20 > /sys/class/rtc/rtc0/wakealarm"
 		sudo echo $SOC_TYPE > /etc/soc_type.txt
 		SOC_TYPE_TEMP=`cat /etc/soc_type.txt`
@@ -93,7 +93,7 @@ case $test_item in
 		sleep 5
 		#echo 1 | sudo tee /proc/sys/kernel/sysrq
 		#echo o | sudo tee /proc/sysrq-trigger
-		sudo systemctl poweroff -f
+		sudo poweroff -f
 		;;
 	2)
 		info_view Reboot
@@ -101,7 +101,7 @@ case $test_item in
 		echo | sudo tee /etc/temp_check_io
 		sudo cp $SCRIPTPATH/reboot_test.sh /etc/init.d/
 		sudo update-rc.d reboot_test.sh defaults
-		#sudo update-rc.d reboot_test.sh enable
+		sudo update-rc.d reboot_test.sh enable
 		sudo echo $SOC_TYPE > /etc/soc_type.txt
 		SOC_TYPE_TEMP=`cat /etc/soc_type.txt`
 		echo $SOC_TYPE_TEMP
@@ -114,7 +114,7 @@ case $test_item in
 
 		#echo 1 | sudo tee /proc/sys/kernel/sysrq
 		#echo b | sudo tee /proc/sysrq-trigger
-		sudo systemctl reboot
+		sudo reboot
 		;;
 	3)
 		info_view Suspend
@@ -191,7 +191,7 @@ case $test_item in
 #			sudo tar cvf /home/$USER/Desktop/$LOGFILE /var/log
 #		fi
 		sleep 1
-		sudo systemctl reboot
+		sudo reboot
 		;;
 	5)
 		if [ -f /etc/shutdown_times.txt ]; then

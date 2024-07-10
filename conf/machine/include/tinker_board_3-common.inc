@@ -12,6 +12,9 @@ do_asus_post_rootfs() {
 		rsync -av --chmod=u=rwX,go=rX "${overlay}/" "${IMAGE_ROOTFS}"
 	done
 
+	mv ${IMAGE_ROOTFS}/usr/bin/tinker-config-tb3 ${IMAGE_ROOTFS}/usr/bin/tinker-config
+	rm ${IMAGE_ROOTFS}/usr/bin/tinker-config-tb3n
+
 	chown -R root:root ${IMAGE_ROOTFS}/etc/sudoers
 	chmod -R 440 ${IMAGE_ROOTFS}/etc/sudoers
 	chown -R root:root ${IMAGE_ROOTFS}/etc/init.d/triggerhappy
