@@ -39,6 +39,7 @@ staff:x:50:
 games:x:60:
 shutdown:x:70:
 users:x:100:
+dhcpcd:x:514:
 ntp:x:993:
 docker:x:994:
 pulse:x:995:pulse
