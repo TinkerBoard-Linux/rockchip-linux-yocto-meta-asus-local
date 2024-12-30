@@ -59,6 +59,11 @@ do_create_xrandr()
 	echo temp > /boot/display/dp/xrandr.cfg
 }
 
+do_wifi_keepalive()
+{
+	/sbin/wifi_keepalive.sh &
+}
+
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
@@ -69,6 +74,7 @@ case "$1" in
 		# set DNS server
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		do_create_xrandr
+		do_wifi_keepalive
 		echo "."
 		;;
 	stop)
