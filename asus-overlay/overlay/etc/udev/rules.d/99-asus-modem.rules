@@ -1,0 +1,15 @@
+SUBSYSTEM=="usb", DRIVERS=="usb", ENV{DEVTYPE}=="usb_device", GOTO="asus_modem_start"
+GOTO="asus_modem_end"
+
+LABEL="asus_modem_start"
+ACTION=="bind", GOTO="asus_modem_bind_start"
+ACTION=="unbind", GOTO="asus_modem_unbind_start"
+GOTO="asus_modem_end"
+
+LABEL="asus_modem_bind_start"
+ATTRS{idVendor}=="2c7c", RUN+="/usr/sbin/service lte-init.sh start &"
+GOTO="asus_modem_end"
+
+LABEL="asus_modem_unbind_start"
+ATTRS{idVendor}=="2c7c", RUN+="/usr/sbin/service lte-init.sh stop &"
+LABEL="asus_modem_end"

@@ -1,0 +1,66 @@
+#!/bin/bash
+# VERSION=1.4_20230719
+UTILS=/etc/modem/utils.sh
+PID=/etc/modem/mm_cli_pid
+TAG="mm_cli"
+
+log() {
+    echo "${TAG} ${1}" > /dev/kmsg
+    logger -t ${TAG} ${1}
+}
+
+case $1 in
+start)
+	log "Start"
+	if [ -e $PID ]
+	then
+		$0 stop
+	fi
+	echo $$ > $PID
+	os=`cat /etc/version`
+	if [[ "$os" =~ "factory" ]]
+	then
+		log "Stop modemmanager for factory image"
+		service network-manager stop
+		killall ModemManager
+	else
+		mmcli -G INFO
+	fi
+	source $UTILS
+	clear_modem_logs
+	send_at_command "AT+QUIMSLOT=1"
+	send_at_command "AT+QDSIM=0"
+	while [ "$SIM_DET" == "" ]
+	do
+		log "Asking QSIMDET..."
+		SIM_DET=$(send_at_command "AT+QSIMDET?"| awk -F "QSIMDET: " '{print $2}')
+		sleep 2
+	done
+	log "SIMDET=$SIM_DET"
+	if [[ "$SIM_DET" =~ "1,0" ]]
+	then
+		log "Check pass"
+		exit 0
+	fi
+	log "Reset SIMDET and reboot module..."
+	send_at_command "AT+QSIMDET=1,0"
+	send_at_command "AT+CFUN=1,1"
+	rm -f $PID
+	exit 0
+	;;
+stop)
+	log "Stop"
+	if [ -e $PID ]
+	then
+		pid=$(cat $PID)
+		log "Kill PID=$pid"
+		rm -f $PID
+		kill -9 $pid
+	fi
+	;;
+*)
+    echo "Usage: mm_cli [COMMAND]"
+    exit 1
+    ;;
+esac
+exit 0

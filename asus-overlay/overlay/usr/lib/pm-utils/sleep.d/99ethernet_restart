@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. "${PM_FUNCTIONS}"
+
+case $1 in
+	suspend)
+		;;
+	resume)
+		sudo ip link set dev eth0 down
+		sudo ip link set dev eth1 down
+		sleep 0.5
+		sudo ip link set dev eth0 up
+		sudo ip link set dev eth1 up
+		;;
+	*) exit $NA
+		;;
+esac
