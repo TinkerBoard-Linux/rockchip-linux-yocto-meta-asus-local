@@ -6,10 +6,10 @@
 
 case $1 in
 	suspend)
-		#sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink true
+		sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink true
 		;;
 	thaw|resume)
-		#sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink false
+		sudo -u weston PULSE_RUNTIME_PATH=/run/user/1000/pulse pactl suspend-sink false
 		;;
 	*) exit $NA
 		;;

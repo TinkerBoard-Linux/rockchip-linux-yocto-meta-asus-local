@@ -9,7 +9,7 @@ if [ $board_name = "rk3566" ];
 then
     jack_status=$(cat /sys/class/extcon/extcon3/cable.1/state)
 else
-    jack_status=$(cat /sys/class/extcon/extcon4/cable.1/state)
+    jack_status=$(cat /sys/class/extcon/extcon3/cable.0/state)
 fi
 
 # Config audio output devices when HDMI hot-plug

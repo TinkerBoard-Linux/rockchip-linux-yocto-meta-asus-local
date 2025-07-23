@@ -64,6 +64,12 @@ do_wifi_keepalive()
 	/sbin/wifi_keepalive.sh &
 }
 
+do_start_pulseaudio()
+{
+	chown weston:weston -R /run/user/1000
+	sudo -u weston pulseaudio --start
+}
+
 case "$1" in
 	start)
 		echo -n "Starting ASUS init"
@@ -75,6 +81,7 @@ case "$1" in
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		do_create_xrandr
 		do_wifi_keepalive
+		do_start_pulseaudio
 		echo "."
 		;;
 	stop)
