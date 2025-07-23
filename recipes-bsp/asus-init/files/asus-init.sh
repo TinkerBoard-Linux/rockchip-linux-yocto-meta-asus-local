@@ -68,6 +68,7 @@ do_start_pulseaudio()
 {
 	chown weston:weston -R /run/user/1000
 	sudo -u weston pulseaudio --start
+	sudo ln -s /usr/lib/pulseaudio/libpulsecommon-17.0.so /usr/lib/libpulsecommon-15.0.so
 }
 
 case "$1" in
