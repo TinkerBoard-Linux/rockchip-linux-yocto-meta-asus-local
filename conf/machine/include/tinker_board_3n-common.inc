@@ -35,6 +35,8 @@ do_asus_post_rootfs() {
 	chmod -R 755 ${IMAGE_ROOTFS}/etc/pulse/switch_sound_device.sh
 	chown -R root:root ${IMAGE_ROOTFS}/etc/profile.d/switch_sound_device_boot.sh
 	chmod -R 755 ${IMAGE_ROOTFS}/etc/profile.d/switch_sound_device_boot.sh
+	chown -R root:root ${IMAGE_ROOTFS}/etc/wireplumber/jack_hotplug.sh
+	chmod -R 755 ${IMAGE_ROOTFS}/etc/wireplumber/jack_hotplug.sh
 	rm -rf ${IMAGE_ROOTFS}/userdata
 	ln -s -r ${IMAGE_ROOTFS}/boot ${IMAGE_ROOTFS}/userdata
 	rm -rf ${IMAGE_ROOTFS}/tmp

@@ -29,12 +29,12 @@ then
     if [ $jack_status = 1 ];
     then
             echo "Audio jack is connected, set default sound card to RK809" > /dev/kmsg
-            /bin/bash  /etc/pulse/switch_sound_device.sh "alsa_output.platform-rk809-sound.HiFi__hw_rockchiprk809__sink"
+            /bin/bash  /etc/pulse/switch_sound_device.sh "alsa_output.0.HiFi__Headphones__sink"
     else
             echo "HDMI is connected, set default sound card to HDMI" > /dev/kmsg
-            /bin/bash /etc/pulse/switch_sound_device.sh "alsa_output.platform-hdmi-sound.stereo-fallback"
+            /bin/bash /etc/pulse/switch_sound_device.sh "alsa_output.1.stereo-fallback"
     fi
 else
     echo "HDMI is disconnected, set default sound card to RK809" > /dev/kmsg
-    /bin/bash  /etc/pulse/switch_sound_device.sh "alsa_output.platform-rk809-sound.HiFi__hw_rockchiprk809__sink"
+    /bin/bash  /etc/pulse/switch_sound_device.sh "alsa_output.0.HiFi__Headphones__sink"
 fi

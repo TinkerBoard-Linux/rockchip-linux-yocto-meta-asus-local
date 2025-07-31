@@ -16,10 +16,10 @@ fi
 if [ $hdmi_status = "connected" ] && [ $jack_status = 0 ];
 then
 	echo "Plug-in HDMI, set default sound card to HDMI" > /dev/kmsg
-	/etc/pulse/switch_sound_device.sh "alsa_output.platform-hdmi-sound.stereo-fallback"
+	/etc/pulse/switch_sound_device.sh "alsa_output.1.stereo-fallback"
 else
 	echo "Plug-out HDMI, set default sound card to RK809" > /dev/kmsg
-	/etc/pulse/switch_sound_device.sh "alsa_output.platform-rk809-sound.HiFi__hw_rockchiprk809__sink"
+	/etc/pulse/switch_sound_device.sh "alsa_output.0.HiFi__Headphones__sink"
 fi
 
 exit 0
