@@ -15,10 +15,10 @@ fi
 # Config audio output devices when HDMI hot-plug
 if [ $hdmi_status = "connected" ] && [ $jack_status = 0 ];
 then
-	echo "Plug-in HDMI, set default sound card to HDMI" > /dev/kmsg
+	echo "drm-hotplug: Plug-in HDMI, set default sound card to HDMI" > /dev/kmsg
 	/etc/pulse/switch_sound_device.sh "alsa_output.1.stereo-fallback"
 else
-	echo "Plug-out HDMI, set default sound card to RK809" > /dev/kmsg
+	echo "drm-hotplug: Plug-out HDMI, set default sound card to RK809" > /dev/kmsg
 	/etc/pulse/switch_sound_device.sh "alsa_output.0.HiFi__Headphones__sink"
 fi
 
